@@ -59,8 +59,8 @@ App URL:
 H2 console:
 
 - `http://localhost:8080/h2-console`
-- requires `ADMIN` application credentials via HTTP Basic Auth
-- JDBC URL: use the generated in-memory JDBC URL shown in startup logs
+- enabled for local database inspection
+- JDBC URL: `jdbc:h2:mem:financeDB`
 - username: `sa`
 - password: empty
 
