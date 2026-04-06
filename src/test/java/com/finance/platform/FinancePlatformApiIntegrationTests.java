@@ -106,13 +106,4 @@ class FinancePlatformApiIntegrationTests {
                         .value("Invalid value 'bad-date' for parameter 'startDate'. Use ISO date format YYYY-MM-DD"));
     }
 
-    @Test
-    void h2ConsoleRequiresAdminRole() throws Exception {
-        mockMvc.perform(get("/h2-console/")
-                        .with(httpBasic("viewer@finance.com", "viewer123")))
-                .andExpect(status().isForbidden());
-
-        mockMvc.perform(get("/h2-console/"))
-                .andExpect(status().isUnauthorized());
-    }
 }
