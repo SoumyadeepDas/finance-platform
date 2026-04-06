@@ -749,3 +749,9 @@ Example error shape:
 - records are soft-deleted rather than physically removed
 - dashboard aggregations are computed in the database layer
 - paginated record responses currently use Spring `Page` serialization
+
+## Future Improvements
+
+- add Spring Cache for dashboard aggregation endpoints such as summary, category breakdown, trends, and recent activity
+- evict dashboard caches automatically when financial records are created, updated, or soft-deleted
+- move from in-memory H2 storage to PostgreSQL or another persistent database for production use

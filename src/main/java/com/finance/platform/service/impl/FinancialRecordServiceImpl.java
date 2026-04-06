@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -37,12 +38,16 @@ public class FinancialRecordServiceImpl implements FinancialRecordService {
     @Override
     @Transactional
     public RecordResponse createRecord(CreateRecordRequest request, Long authenticatedUserId) {
+        if (authenticatedUserId == null || authenticatedUserId <= 0) {
+            throw new IllegalStateException("Authenticated user context is required to create records");
+        }
+
         FinancialRecord record = new FinancialRecord();
         record.setAmount(request.getAmount());
         record.setType(request.getType());
-        record.setCategory(request.getCategory().trim().toUpperCase());
+        record.setCategory(normalizeCategory(request.getCategory()));
         record.setDate(request.getDate());
-        record.setDescription(request.getDescription());
+        record.setDescription(normalizeDescription(request.getDescription()));
 
         record.setCreatedBy(authenticatedUserId);
 
@@ -80,9 +85,9 @@ public class FinancialRecordServiceImpl implements FinancialRecordService {
 
         record.setAmount(request.getAmount());
         record.setType(request.getType());
-        record.setCategory(request.getCategory().trim().toUpperCase());
+        record.setCategory(normalizeCategory(request.getCategory()));
         record.setDate(request.getDate());
-        record.setDescription(request.getDescription());
+        record.setDescription(normalizeDescription(request.getDescription()));
 
         FinancialRecord saved = recordRepository.save(record);
 
@@ -148,5 +153,18 @@ public class FinancialRecordServiceImpl implements FinancialRecordService {
         return recordRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Financial record not found with id: " + id));
+    }
+
+    private String normalizeCategory(String category) {
+        return category.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private String normalizeDescription(String description) {
+        if (description == null) {
+            return null;
+        }
+
+        String trimmed = description.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

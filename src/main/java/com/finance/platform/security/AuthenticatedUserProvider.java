@@ -6,6 +6,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
  * Resolves the current authenticated user from the security context.
  */
@@ -23,7 +25,14 @@ public class AuthenticatedUserProvider {
      */
     public Long getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new IllegalStateException("No authenticated user found in security context");
+        }
+
+        String email = Objects.toString(auth.getName(), "").trim();
+        if (email.isEmpty() || "anonymousUser".equals(email)) {
+            throw new IllegalStateException("Authenticated user email is unavailable in security context");
+        }
 
         return userRepository.findByEmail(email)
                 .map(User::getId)

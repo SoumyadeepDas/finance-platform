@@ -10,7 +10,7 @@ This project is a Spring Boot backend for a finance dashboard system. It provide
 - input validation and structured error responses
 - JPA/H2 persistence for local development and demonstration
 
-The embedded H2 console is intended for admin-only local inspection and is protected by the same application security layer.
+The embedded H2 console is enabled for local database inspection during development and demo use.
 
 The backend is designed to serve a frontend dashboard cleanly through REST APIs.
 
@@ -499,7 +499,6 @@ Current tests:
   - analyst cannot create records
   - invalid date ranges return `400`
   - invalid query parameter values return `400`
-  - H2 console is not publicly accessible
 
 Run tests:
 
@@ -524,8 +523,8 @@ Application:
 H2 console:
 
 - `http://localhost:8080/h2-console`
-- requires `ADMIN` application credentials via HTTP Basic Auth
-- JDBC URL: use the generated in-memory JDBC URL shown in startup logs
+- enabled for local database inspection
+- JDBC URL: `jdbc:h2:mem:financeDB`
 - username: `sa`
 - password: empty
 
@@ -555,6 +554,8 @@ If this project is taken further, the most useful next steps are:
 4. add record ownership or tenant boundaries if needed
 5. move from H2 to PostgreSQL for persistent environments
 6. standardize paginated responses via DTOs
+7. add Spring Cache for dashboard summary, category breakdown, monthly trends, and recent activity
+8. evict dashboard caches whenever financial records are created, updated, or soft-deleted
 
 ---
 

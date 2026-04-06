@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -38,14 +39,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        String normalizedEmail = normalizeEmail(request.getEmail());
+
+        if (userRepository.existsByEmail(normalizedEmail)) {
             throw new DuplicateResourceException(
-                    "User with email '" + request.getEmail() + "' already exists");
+                    "User with email '" + normalizedEmail + "' already exists");
         }
 
         User user = new User(
-                request.getName(),
-                request.getEmail(),
+                request.getName().trim(),
+                normalizedEmail,
                 passwordEncoder.encode(request.getPassword()),
                 request.getRole()
         );
@@ -77,15 +80,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse updateUser(Long id, UpdateUserRequest request) {
         User user = findUserOrThrow(id);
+        String normalizedEmail = normalizeEmail(request.getEmail());
 
-        if (!user.getEmail().equals(request.getEmail())
-                && userRepository.existsByEmail(request.getEmail())) {
+        if (!user.getEmail().equals(normalizedEmail)
+                && userRepository.existsByEmail(normalizedEmail)) {
             throw new DuplicateResourceException(
-                    "Email '" + request.getEmail() + "' is already in use");
+                    "Email '" + normalizedEmail + "' is already in use");
         }
 
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
+        user.setName(request.getName().trim());
+        user.setEmail(normalizedEmail);
         User saved = userRepository.save(user);
         log.info("Updated user: id={}, email={}", saved.getId(), saved.getEmail());
 
@@ -129,5 +133,9 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "User not found with id: " + id));
+    }
+
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 }
